@@ -75,18 +75,18 @@ public class UserController {
     }
 
 
-    @GetMapping("/users/{stringId}")
-    @PreAuthorize("hasRole('User')")
-    public User getUserDataByTeacherAndStudent(@PathVariable String stringId) {
-        // Retrieve the currently authenticated user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = Long.parseLong(authentication.getName());
-
-        Optional<User> userOptional = userDao.findByIdAndUserId(stringId);
-
-        return userOptional.orElseThrow(() -> new RuntimeException("User not found with ID: " + stringId));
-
-    }
+//    @GetMapping("/users/{stringId}")
+//    @PreAuthorize("hasRole('User')")
+//    public User getUserDataByTeacherAndStudent(@PathVariable String stringId) {
+//        // Retrieve the currently authenticated user
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        Long userId = Long.parseLong(authentication.getName());
+//
+//        Optional<User> userOptional = userDao.findByIdAndUserId(stringId);
+//
+//        return userOptional.orElseThrow(() -> new RuntimeException("User not found with ID: " + stringId));
+//
+//    }
 
 
     @PutMapping("/users/{id}")
