@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
@@ -22,6 +23,8 @@ public class UserController {
 
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     public UserController(UserService theUserService,UserDao theUserDao){
 
         userService = theUserService;
@@ -101,13 +104,15 @@ public class UserController {
         return userDao.save(existingUser);
     }
 
+    // common for admin,student and teacher
     @PutMapping("/users/editProfile/{id}")
-    public User editTeacherOrStudentProfile(@PathVariable String id, @RequestBody User updatedUser) {
+    @PreAuthorize("hasRole('Admin')")       // preauthorize korte hobe nahole token chara edit kora hoye jacche
+    public User editProfile(@PathVariable String id, @RequestBody User updatedUser) {
         User existingUser = userDao.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
 
-        // existingUser.setUserName(updatedUser.getUserName());
-        // user name is the id
+        // .setUserName(updatedUser.getUserName());
+        // user_name is the id
         // it will be constant by default
         existingUser.setUserFirstName(updatedUser.getUserFirstName());
         existingUser.setUserLastName(updatedUser.getUserLastName());
@@ -117,9 +122,24 @@ public class UserController {
         return userDao.save(existingUser);
     }
 
+    @PutMapping("/users/resetPassword/{id}")
+    @PreAuthorize("hasRole('Admin')")
+    public User resetPassword(@PathVariable String id, @RequestBody User updatedUser) {
+        User existingUser = userDao.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+
+        // .setUserName(updatedUser.getUserName());
+        // user_name is the id
+        // it will be constant by default
+        existingUser.setUserPassword(getEncodedPassword(updatedUser.getUserPassword()));
+
+        return userDao.save(existingUser);
+    }
+
     // admin teacher and students everyone access this
     // to view his profile informatio from user table
-    @GetMapping("users/viewProfileData")
+    @GetMapping("users/viewProfile")
+    @PreAuthorize("hasRole('Admin') or hasRole('Student')")       // preauthorize korte hobe nahole token chara edit kora hoye jacche
     public ResponseEntity<Optional<User>> getCurrentUser(Authentication authentication) {
         String currentUserId = authentication.getName();
 
@@ -134,19 +154,11 @@ public class UserController {
         }
     }
 
-    @GetMapping("/editProfileData")
-    public ResponseEntity<Optional<User>> editCurrentUserData(Authentication authentication) {
-        String currentUserId = authentication.getName();
 
-        // Assuming you have a service or repository to fetch the teacher information based on the user ID
-        Optional<User> userOptional = userDao.findById(currentUserId);
 
-        if (userOptional.isPresent()) {
-            User currentUser = userOptional.get();
-            return ResponseEntity.ok(Optional.of(currentUser));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+
+    public String getEncodedPassword(String password) {
+        return passwordEncoder.encode(password);
     }
 
 }
