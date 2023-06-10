@@ -1,5 +1,6 @@
 package com.kaab.controller;
 
+import com.kaab.dao.RoleDao;
 import com.kaab.dao.StudentDao;
 import com.kaab.dao.TeacherDao;
 import com.kaab.dao.UserDao;
@@ -11,12 +12,16 @@ import com.kaab.service.AdminService;
 import com.kaab.service.JwtService;
 import com.kaab.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
 @RestController
 public class AdminController {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Autowired
     private JwtService jwtService;
     @Autowired
@@ -26,6 +31,8 @@ public class AdminController {
     private UserDao userDao;
     @Autowired
     private TeacherDao teacherDao;
+    @Autowired
+    private RoleDao roleDao;
     @Autowired
     private StudentDao studentDao;
     @Autowired
@@ -57,15 +64,13 @@ public class AdminController {
         return userDao.save(existingUser);
     }
 
-//    @PutMapping("/admin/addRole/{id}")
-//    public User assignRole(@PathVariable String id, @RequestBody User updatedUser) {
-//        Set<Role> roles = new HashSet<>();
-//        roles.add(new Role());
-//        updatedUser.setRole(roles);
-//        updatedUser.setUserName(updatedUser.getUserName());
-//        return userDao.save(updatedUser);
-//
-//    }
+    @PutMapping("/admin/addRole/{id}")
+    public User assignRole(@PathVariable String id,@RequestBody User updatedUser) {
+        User existingUser = userDao.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+        existingUser.setRole(updatedUser.getRole());
+        return updatedUser;
+    }
 
 
 
