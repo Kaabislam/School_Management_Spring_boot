@@ -1,14 +1,23 @@
 package com.kaab.entity;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
 public class Role {
 
+
+
     @Id
     private String roleName;
     private String roleDescription;
+
+    @Autowired
+    public Role() {
+
+    }
 
     public String getRoleName() {
         return roleName;

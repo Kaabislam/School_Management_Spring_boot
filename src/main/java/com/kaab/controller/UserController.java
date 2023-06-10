@@ -4,6 +4,7 @@ import com.kaab.dao.UserDao;
 import com.kaab.entity.User;
 import com.kaab.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,7 +40,7 @@ public class UserController {
     }
 
     @GetMapping({"/forAdmin"})
-    @PreAuthorize("hasRole('Admin')")
+//    @PreAuthorize("hasRole('Admin')")
     public String forAdmin(){
         return "This URL is only accessible to the admin";
     }
@@ -107,14 +108,45 @@ public class UserController {
 
         // existingUser.setUserName(updatedUser.getUserName());
         // user name is the id
-        // it will not be changed
+        // it will be constant by default
         existingUser.setUserFirstName(updatedUser.getUserFirstName());
         existingUser.setUserLastName(updatedUser.getUserLastName());
         existingUser.setDepartmentName(updatedUser.getDepartmentName());
-
+        existingUser.setIsActivated(updatedUser.getIsActivated());
+        existingUser.setDepartmentName(updatedUser.getDepartmentName());
         return userDao.save(existingUser);
     }
 
+    // admin teacher and students everyone access this
+    // to view his profile informatio from user table
+    @GetMapping("users/viewProfileData")
+    public ResponseEntity<Optional<User>> getCurrentUser(Authentication authentication) {
+        String currentUserId = authentication.getName();
 
+        // Assuming you have a service or repository to fetch the teacher information based on the user ID
+        Optional<User> userOptional = userDao.findById(currentUserId);
+
+        if (userOptional.isPresent()) {
+            User currentUser = userOptional.get();
+            return ResponseEntity.ok(Optional.of(currentUser));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/editProfileData")
+    public ResponseEntity<Optional<User>> editCurrentUserData(Authentication authentication) {
+        String currentUserId = authentication.getName();
+
+        // Assuming you have a service or repository to fetch the teacher information based on the user ID
+        Optional<User> userOptional = userDao.findById(currentUserId);
+
+        if (userOptional.isPresent()) {
+            User currentUser = userOptional.get();
+            return ResponseEntity.ok(Optional.of(currentUser));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
 }

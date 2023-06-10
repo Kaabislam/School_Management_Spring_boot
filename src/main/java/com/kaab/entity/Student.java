@@ -5,7 +5,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 @Entity
-public class Student {
+public class Student{
     @Id
     private String userName;
     private String email;
@@ -14,8 +14,7 @@ public class Student {
 
     private String advisorId;
 
-    @ManyToOne
-    public Teacher teacher;
+
 
     public String getUserName() {
         return userName;

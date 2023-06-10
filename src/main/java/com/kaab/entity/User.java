@@ -14,6 +14,7 @@ public class User {
     private  String departmentName;
     private  String advisorId;
     private String isActivated;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "USER_ROLE",
             joinColumns = {
@@ -23,6 +24,8 @@ public class User {
                     @JoinColumn(name = "ROLE_ID")
             }
     )
+    @ElementCollection(targetClass = Role.class)
+    @Enumerated(EnumType.STRING)
     private Set<Role> role;
 
     public String getUserName() {
@@ -88,4 +91,5 @@ public class User {
     public void setIsActivated(String isActivated) {
         this.isActivated = isActivated;
     }
+
 }
