@@ -52,7 +52,7 @@ public class TeacherController {
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + studentId));
         if(!existingStudent.getAdvisorId().equals(userId)){
 
-            throw new RuntimeException("this student is not in your advising list - "+ studentId);
+            throw new RuntimeException("this student is not in your advising list - "+ studentId + " " + userId + " " + existingStudent.getAdvisorId());
         }
         existingStudent.setAdvisorId(null);
 
