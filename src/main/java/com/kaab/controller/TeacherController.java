@@ -1,19 +1,20 @@
 package com.kaab.controller;
 
+import com.kaab.dao.StudentDao;
 import com.kaab.dao.TeacherDao;
 import com.kaab.dao.UserDao;
-import com.kaab.entity.Teacher;
-import com.kaab.entity.User;
+import com.kaab.entity.Student;
 import com.kaab.service.JwtService;
 import com.kaab.service.TeacherService;
 import com.kaab.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class TeacherController {
@@ -29,7 +30,8 @@ public class TeacherController {
     @Autowired
     private TeacherService teacherService;
 
-
+    @Autowired
+    private StudentDao studentDao;
 
 
     @GetMapping("/{teacherId}/students")
@@ -37,8 +39,25 @@ public class TeacherController {
         List<String> studentIds = teacherDao.findStudentIdsByTeacherId(teacherId);
         return ResponseEntity.ok(studentIds);
     }
-    @GetMapping("/b")
-    public String getStudentIdsByTeacherId() {
-        return "Asdas";
+    @Transactional
+    @GetMapping("/teacher/{studentId}")
+    public Student removeFromAdvisingList(@PathVariable("studentId") String studentId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = null;
+        if (authentication != null && authentication.isAuthenticated()) {
+            userId = authentication.getName();
+
+        }
+        Student existingStudent = studentDao.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + studentId));
+        if(!existingStudent.getAdvisorId().equals(userId)){
+
+            throw new RuntimeException("this student is not in your advising list - "+ studentId);
+        }
+        existingStudent.setAdvisorId(null);
+
+        return  existingStudent;
+
+
     }
 }
