@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -31,11 +32,13 @@ public class TeacherController {
 
 
 
-//    @GetMapping("/teacher/{stringId}")
-//    public User getUserDataByAdmin(@PathVariable String stringId) {
-//        Optional<User> userOptional = userDao.findById(stringId);
-//
-//        return userOptional.orElseThrow(() -> new RuntimeException("User not found with string ID: " + stringId));
-//    }
-
+    @GetMapping("/{teacherId}/students")
+    public ResponseEntity<List<String>> getStudentIdsByTeacherId(@PathVariable("teacherId") String teacherId) {
+        List<String> studentIds = teacherDao.findStudentIdsByTeacherId(teacherId);
+        return ResponseEntity.ok(studentIds);
+    }
+    @GetMapping("/b")
+    public String getStudentIdsByTeacherId() {
+        return "Asdas";
+    }
 }

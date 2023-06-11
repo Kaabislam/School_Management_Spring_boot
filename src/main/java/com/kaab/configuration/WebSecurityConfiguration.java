@@ -47,7 +47,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/authenticate", "/registerNewUser").permitAll()
                 .antMatchers("/users/**").permitAll()
                 .antMatchers(HttpHeaders.ALLOW).permitAll()
-                .anyRequest().authenticated()
+//                .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .and()

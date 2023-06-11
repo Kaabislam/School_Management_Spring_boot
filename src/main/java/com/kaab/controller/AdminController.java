@@ -20,9 +20,6 @@ import java.util.*;
 @RestController
 public class AdminController {
     @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
     private JwtService jwtService;
     @Autowired
     private UserService userService;

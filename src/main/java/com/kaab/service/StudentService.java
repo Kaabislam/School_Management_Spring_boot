@@ -16,8 +16,6 @@ public class StudentService {
     private RoleDao roleDao;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
     private StudentDao studentDao;
 
 }
