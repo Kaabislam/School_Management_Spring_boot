@@ -5,12 +5,17 @@ import com.kaab.entity.Request;
 import com.kaab.entity.RequestStatus;
 import com.kaab.entity.Student;
 import com.kaab.entity.Teacher;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class RequestService {
+    @Autowired
     private final RequestDao requestDao;
 
+    @Autowired
     public RequestService(RequestDao requestDao) {
         this.requestDao = requestDao;
     }
@@ -22,6 +27,7 @@ public class RequestService {
         request.setStatus(RequestStatus.PENDING);
         return requestDao.save(request);
     }
+
 
 //    public List<Request> getRequestsByStudent(Student student) {
 //        return requestRepository.findByStudent(student);
