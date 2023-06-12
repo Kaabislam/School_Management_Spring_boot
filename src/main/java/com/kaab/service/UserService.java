@@ -1,6 +1,7 @@
 package com.kaab.service;
 
 import com.kaab.dao.UserDao;
+import com.kaab.entity.ActivationStatus;
 import com.kaab.entity.RoleType;
 import com.kaab.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ public class UserService {
         User adminUser = new User();
         adminUser.setUserName("admin");
         adminUser.setUserPassword(getEncodedPassword("admin"));
+        adminUser.setActivationStatus(ActivationStatus.ACTIVE);
         adminUser.setUserFirstName("admin");
         adminUser.setUserLastName("admin");
         adminUser.setRoleType(RoleType.ADMIN);

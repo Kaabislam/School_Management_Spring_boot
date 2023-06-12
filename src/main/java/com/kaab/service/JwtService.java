@@ -3,6 +3,7 @@ package com.kaab.service;
 import com.kaab.dao.UserDao;
 import com.kaab.entity.JwtRequest;
 import com.kaab.entity.JwtResponse;
+import com.kaab.entity.RoleType;
 import com.kaab.entity.User;
 import com.kaab.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,9 +61,22 @@ public class JwtService implements UserDetailsService {
 
     private Set getAuthority(User user) {
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
-//        user.getRole().forEach(role -> {
-//            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getRoleName()));
-//        });
+//        if(user.getRoleType().equals("Admin")) {
+//            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRoleType()));
+//        }
+//        if(user.getRoleType() != null && user.getRoleType().equals("TEACHER") && user.getActivationStatus().equals("ACTIVE")) {
+//            System.out.println("techer _ activate");
+//            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRoleType()));
+//        }
+//        String x = "ROLE_" + user.getRoleType();
+//        System.out.println(x + " " + user.getRoleType());
+
+        if(user.getRoleType() != null &&  user.getActivationStatus().equals("ACTIVE")) {
+            String role =  user.getRoleType().toString();
+            authorities.add(new SimpleGrantedAuthority(role));
+
+        }
+
         return authorities;
     }
 
