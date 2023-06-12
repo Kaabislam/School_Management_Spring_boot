@@ -1,9 +1,9 @@
 package com.kaab.entity;
 
 public enum RoleType {
-    ADMIN("Admin"),
-    TEACHER("Teacher"),
-    STUDENT("Student");
+    ADMIN("ADMIN"),
+    TEACHER("TEACHER"),
+    STUDENT("STUDENT");
 
     private String name;
 

@@ -10,6 +10,7 @@ import com.kaab.service.TeacherService;
 import com.kaab.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +37,7 @@ public class TeacherController {
 
     @Transactional      // ok
     @PutMapping("/teacher/editProfile/{id}")
-//    @PreAuthorize("hasRole('Admin')")       // preauthorize korte hobe nahole token chara edit kora hoye jacche
+    @PreAuthorize("hasRole('TEACHER')")       // preauthorize korte hobe nahole token chara edit kora hoye jacche
     public Teacher editProfile(@PathVariable String id, @RequestBody Teacher updatedUser) {
         Teacher existingUser = teacherDao.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
@@ -46,6 +47,7 @@ public class TeacherController {
 
     // find all the student whose are in the teacher advising list
     @GetMapping("/{teacherId}/students")    // ok
+
     public ResponseEntity<List<String>> getStudentIdsByTeacherId(@PathVariable("teacherId") String teacherId) {
         List<String> studentIds = teacherDao.findStudentIdsByTeacherId(teacherId);
         return ResponseEntity.ok(studentIds);

@@ -61,21 +61,13 @@ public class JwtService implements UserDetailsService {
 
     private Set getAuthority(User user) {
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
-//        if(user.getRoleType().equals("Admin")) {
-//            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRoleType()));
-//        }
-//        if(user.getRoleType() != null && user.getRoleType().equals("TEACHER") && user.getActivationStatus().equals("ACTIVE")) {
-//            System.out.println("techer _ activate");
-//            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRoleType()));
-//        }
-//        String x = "ROLE_" + user.getRoleType();
-//        System.out.println(x + " " + user.getRoleType());
+        if(user.getRoleType().getName().equals("ADMIN") && user.getActivationStatus().getName().equals("ACTIVE")) authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        if(user.getRoleType().getName().equals("STUDENT") &&  user.getActivationStatus().getName().equals("ACTIVE")) authorities.add(new SimpleGrantedAuthority("ROLE_STUDENT"));
+        if(user.getRoleType().getName().equals("TEACHER") &&  user.getActivationStatus().getName().equals("ACTIVE")) authorities.add(new SimpleGrantedAuthority("ROLE_TEACHER"));
 
-        if(user.getRoleType() != null &&  user.getActivationStatus().equals("ACTIVE")) {
-            String role =  user.getRoleType().toString();
-            authorities.add(new SimpleGrantedAuthority(role));
-
-        }
+        System.out.println(user.getRoleType().getName());
+        System.out.println(authorities);
+        System.out.println();
 
         return authorities;
     }

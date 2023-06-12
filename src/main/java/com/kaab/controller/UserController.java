@@ -63,7 +63,7 @@ public class UserController {
 
 
     @GetMapping("/users")
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<User> getAllUsers() {
         return userDao.findAll();
     }
@@ -74,7 +74,7 @@ public class UserController {
     // this is for admin
     // admin can find any user with his id
     @GetMapping("/users/{stringId}")        // ok
-//    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public User getUserDataByAdmin(@PathVariable String stringId) {
         Optional<User> userOptional = userDao.findById(stringId);
 
@@ -102,7 +102,7 @@ public class UserController {
     // admin teacher and students everyone access this
     // to view his profile information from user table
     @GetMapping("users/viewProfile")        //ok
-//    @PreAuthorize("hasRole('Admin') or hasRole('Student')" or hasRole("TEACHER"))       // preauthorize korte hobe nahole token chara edit kora hoye jacche
+//    @PreAuthorize("hasRole('ADMIN') or hasRole('STUDENT') or hasRole('TEACHER')")       // preauthorize korte hobe nahole token chara edit kora hoye jacche
     public ResponseEntity<Optional<User>> getCurrentUser(Authentication authentication) {
         String currentUserId = authentication.getName();
         Optional<User> userOptional = userDao.findById(currentUserId);
