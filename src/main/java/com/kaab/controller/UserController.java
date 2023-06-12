@@ -1,6 +1,11 @@
 package com.kaab.controller;
 
+import com.kaab.dao.StudentDao;
+import com.kaab.dao.TeacherDao;
 import com.kaab.dao.UserDao;
+import com.kaab.entity.RoleType;
+import com.kaab.entity.Student;
+import com.kaab.entity.Teacher;
 import com.kaab.entity.User;
 import com.kaab.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +29,10 @@ public class UserController {
 
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private StudentDao studentDao;
+    @Autowired
+    private TeacherDao teacherDao;
     @Autowired
     private PasswordEncoder passwordEncoder;
     public UserController(UserService theUserService,UserDao theUserDao){
@@ -36,11 +46,7 @@ public class UserController {
         userService.initRoleAndUser();
     }
 
-    @PostMapping({"/registerNewUser"})
-//    @PreAuthorize("hasRole('Admin')")
-    public User registerNewUser(@RequestBody User user) {
-        return userService.registerNewUser(user);
-    }
+
 
     @GetMapping({"/forAdmin"})
 //    @PreAuthorize("hasRole('Admin')")
@@ -55,97 +61,49 @@ public class UserController {
     }
 
 
-    @GetMapping("/users")
+    @GetMapping("/users")           //ok
     public List<User> getAllUsers() {
         return userDao.findAll();
     }
 
-//    @GetMapping("/users/{identifier}")
-//    public User getUserByIdentifier(@PathVariable String identifier) {
-//        Optional<User> userOptional = userDao.findByIdentifier(identifier);
-//
-//        return userOptional.orElseThrow(() -> new RuntimeException("User not found with identifier: " + identifier));
-//    }
+
 
 
     // this is for admin
     // admin can find any user with his id
-    @GetMapping("/users/{stringId}")
-    @PreAuthorize("hasRole('Admin')")
+    @GetMapping("/users/{stringId}")        // ok
+//    @PreAuthorize("hasRole('Admin')")
     public User getUserDataByAdmin(@PathVariable String stringId) {
         Optional<User> userOptional = userDao.findById(stringId);
 
         return userOptional.orElseThrow(() -> new RuntimeException("User not found with string ID: " + stringId));
     }
 
-
-//    @GetMapping("/users/{stringId}")
-//    @PreAuthorize("hasRole('User')")
-//    public User getUserDataByTeacherAndStudent(@PathVariable String stringId) {
-//        // Retrieve the currently authenticated user
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        Long userId = Long.parseLong(authentication.getName());
-//
-//        Optional<User> userOptional = userDao.findByIdAndUserId(stringId);
-//
-//        return userOptional.orElseThrow(() -> new RuntimeException("User not found with ID: " + stringId));
-//
-//    }
-
-
-    @PutMapping("/users/{id}")
-    public User updateUserActivationInfo(@PathVariable String id, @RequestBody User updatedUser) {
-        User existingUser = userDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
-
-//        existingUser.setUserName(updatedUser.getUserName());
-        existingUser.setIsActivated(updatedUser.getIsActivated());
-
-        return userDao.save(existingUser);
-    }
-
     // common for admin,student and teacher
-    @PutMapping("/users/editProfile/{id}")
-    @PreAuthorize("hasRole('Admin')")       // preauthorize korte hobe nahole token chara edit kora hoye jacche
-    public User editProfile(@PathVariable String id, @RequestBody User updatedUser) {
-        User existingUser = userDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
 
-        // .setUserName(updatedUser.getUserName());
-        // user_name is the id
-        // it will be constant by default
-        existingUser.setUserFirstName(updatedUser.getUserFirstName());
-        existingUser.setUserLastName(updatedUser.getUserLastName());
-        existingUser.setDepartmentName(updatedUser.getDepartmentName());
-        existingUser.setIsActivated(updatedUser.getIsActivated());
-        existingUser.setDepartmentName(updatedUser.getDepartmentName());
-        return userDao.save(existingUser);
+    @PutMapping("/users/resetPassword")             // ok
+//    @PreAuthorize("hasRole('Admin')")
+    public User resetPassword(@RequestBody User updatedUser) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = null;
+        if (authentication != null && authentication.isAuthenticated()) {
+            userId = authentication.getName();
+        }
+        String finalUserId = userId;
+        User currentLoggedUser = userDao.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + finalUserId));
+        currentLoggedUser.setUserPassword(getEncodedPassword(updatedUser.getUserPassword()));
+        return userDao.save(currentLoggedUser);
     }
 
-    @PutMapping("/users/resetPassword/{id}")
-    @PreAuthorize("hasRole('Admin')")
-    public User resetPassword(@PathVariable String id, @RequestBody User updatedUser) {
-        User existingUser = userDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
-
-        // .setUserName(updatedUser.getUserName());
-        // user_name is the id
-        // it will be constant by default
-        existingUser.setUserPassword(getEncodedPassword(updatedUser.getUserPassword()));
-
-        return userDao.save(existingUser);
-    }
 
     // admin teacher and students everyone access this
-    // to view his profile informatio from user table
-    @GetMapping("users/viewProfile")
-    @PreAuthorize("hasRole('Admin') or hasRole('Student')")       // preauthorize korte hobe nahole token chara edit kora hoye jacche
+    // to view his profile information from user table
+    @GetMapping("users/viewProfile")        //ok
+//    @PreAuthorize("hasRole('Admin') or hasRole('Student')" or hasRole("TEACHER"))       // preauthorize korte hobe nahole token chara edit kora hoye jacche
     public ResponseEntity<Optional<User>> getCurrentUser(Authentication authentication) {
         String currentUserId = authentication.getName();
-
-        // Assuming you have a service or repository to fetch the teacher information based on the user ID
         Optional<User> userOptional = userDao.findById(currentUserId);
-
         if (userOptional.isPresent()) {
             User currentUser = userOptional.get();
             return ResponseEntity.ok(Optional.of(currentUser));

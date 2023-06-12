@@ -1,10 +1,9 @@
 package com.kaab.controller;
 
-import com.kaab.dao.RoleDao;
 import com.kaab.dao.StudentDao;
 import com.kaab.dao.TeacherDao;
 import com.kaab.dao.UserDao;
-import com.kaab.entity.Role;
+import com.kaab.entity.ActivationStatus;
 import com.kaab.entity.Student;
 import com.kaab.entity.Teacher;
 import com.kaab.entity.User;
@@ -15,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import java.util.*;
 
 @RestController
@@ -28,47 +28,71 @@ public class AdminController {
     private UserDao userDao;
     @Autowired
     private TeacherDao teacherDao;
-    @Autowired
-    private RoleDao roleDao;
+    //    @Autowired
+//    private RoleDao roleDao;
     @Autowired
     private StudentDao studentDao;
     @Autowired
     private AdminService teacherService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 
-    @GetMapping("/admin/users")
+    @GetMapping("/admin/users")     // ok
     public List<User> getAllUsers() {
         return userDao.findAll();
     }
-    @GetMapping("/admin/teachers")
+    @GetMapping("/admin/teachers")  // ok
     public List<Teacher> getAllTeachers() {
         return (List<Teacher>) teacherDao.findAll();
     }
 
-    @GetMapping("/admin/students")
+    @GetMapping("/admin/students")  // ok
     public List<Student> getAllStudents() {
         return (List<Student>) studentDao.findAll();
     }
 
-    @PutMapping("/admin/upadateActivationInfo/{id}")
-    public User updateActivationInfo(@PathVariable String id, @RequestBody User updatedUser) {
-        User existingUser = userDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
-
-//        existingUser.setUserName(updatedUser.getUserName());
-        existingUser.setIsActivated(updatedUser.getIsActivated());
-
-        return userDao.save(existingUser);
+    @PostMapping({"/admin/registerNewUser"})  // ok
+//    @PreAuthorize("hasRole('Admin')")
+    public User registerNewUser(@RequestBody User user) {
+        return userDao.save(user);
     }
 
-    @PutMapping("/admin/addRole/{id}")
-    public User assignRole(@PathVariable String id,@RequestBody User updatedUser) {
-        User existingUser = userDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
-        existingUser.setRole(updatedUser.getRole());
-        return updatedUser;
+    @Transactional
+    @PutMapping({"/admin/registerNewStudent"})   //ok
+//    @PreAuthorize("hasRole('Admin')")
+    public Student registerNewStudent(@RequestBody Student student) {
+        student.getUser().setUserPassword(passwordEncoder.encode(student.getUser().getUserPassword()));
+        student.getUser().setActivationStatus(ActivationStatus.ACTIVE);
+        return studentDao.save(student);
     }
 
+    @Transactional          //ok
+    @PostMapping({"/admin/registerNewTeacher"})
+//    @PreAuthorize("hasRole('Admin')")
+    public Teacher registerTeacher(@RequestBody Teacher teacher) {
+        teacher.getUser().setUserPassword(passwordEncoder.encode(teacher.getUser().getUserPassword()));
+        return teacherDao.save(teacher);
+    }
+
+
+
+
+    @PutMapping("/admin/activeAccount/{id}")        // ok
+    public User makeAccountActive(@PathVariable String id) {
+        User currentUser = userDao.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+        currentUser.setActivationStatus(ActivationStatus.ACTIVE);
+        return userDao.save(currentUser);
+    }
+
+    @PutMapping("/admin/deactiveAccount/{id}")        // ok
+    public User makeAccountDeactive(@PathVariable String id) {
+        User currentUser = userDao.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+        currentUser.setActivationStatus(ActivationStatus.DEACTIVE);
+        return userDao.save(currentUser);
+    }
 
 
 }

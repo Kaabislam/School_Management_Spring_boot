@@ -7,6 +7,8 @@ import com.kaab.entity.*;
 import com.kaab.service.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,25 +34,22 @@ public class RequestController {
     // student send request on teachers end
     // if sending is successful then request status will be pending initially
     @Transactional
-    @PostMapping("/request/{studentId}")
-    public Request createRequest(@PathVariable String studentId, @RequestBody String teacherId) {
-        Student currentStudent = studentDao.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("User not found with Student ID: " + studentId));
-        Teacher currentTeacher = teacherDao.findById(teacherId)
-                .orElseThrow(() -> new RuntimeException("User not found with teacher ID: " + teacherId));
-        return requestService.createRequest(currentStudent,currentTeacher);
+    @PostMapping("/request")        // OK
+    public Request createRequest(@RequestBody Request request) {
+        return requestDao.save(request);
     }
+
     // find all the request
     // can be applicable for admin only
     @Transactional
-    @GetMapping("/request")
+    @GetMapping("/request")     // ok
     public List<Request> getAllRequest() throws Exception {
         return requestDao.findAll();
     }
 
     // find all the request for a teacher using teacher id
     // use request table
-    @GetMapping("/request/{teacherId}")
+    @GetMapping("/request/{teacherId}")         // ok
     public ResponseEntity<List<Request>> getAllRequest(@PathVariable("teacherId") String teacherId) {
         List<Request> requestList = requestDao.findAllByTeacherId(teacherId);
         return ResponseEntity.ok(requestList);
@@ -59,16 +58,21 @@ public class RequestController {
     // accept or reject a request
     // from teachers end
     @Transactional
-    @PutMapping("/acceptRequest/{requestId}")
+    @PutMapping("/acceptRequest/{requestId}")           // ok
     public ResponseEntity<Request> acceptRequest(@PathVariable("requestId") Long requestId){
         Request currentRequest = requestDao.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found with ID: " + requestId));
+        // UPDATE REQUEST TABLE
         currentRequest.setStatus(RequestStatus.ACCEPTED);
+
+        // ALSO MODIFIED ON STUDENT TABLE
+        currentRequest.getStudent().setAdvisorId(currentRequest.getTeacher().getUserName());
+
         return ResponseEntity.ok(currentRequest);
     }
 
     @Transactional
-    @PutMapping("/rejectRequest/{requestId}")
+    @PutMapping("/rejectRequest/{requestId}")   // ok
     public ResponseEntity<Request> rejectRequest(@PathVariable("requestId") Long requestId){
         Request currentRequest = requestDao.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found with ID: " + requestId));

@@ -14,19 +14,26 @@ public class User {
     private  String departmentName;
     private  String advisorId;
     private String isActivated;
+    private String  email;
+    private RoleType roleType;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name = "USER_ROLE",
-            joinColumns = {
-                    @JoinColumn(name = "USER_ID")
-            },
-            inverseJoinColumns = {
-                    @JoinColumn(name = "ROLE_ID")
-            }
-    )
-    @ElementCollection(targetClass = Role.class)
-    @Enumerated(EnumType.STRING)
-    private Set<Role> role;
+    private ActivationStatus activationStatus;
+
+//
+//    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+//    @JoinTable(name = "USER_ROLE",
+//            joinColumns = {
+//                    @JoinColumn(name = "USER_ID")
+//            },
+//            inverseJoinColumns = {
+//                    @JoinColumn(name = "ROLE_ID")
+//            }
+//
+//    )
+//
+//    @ElementCollection(targetClass = Role.class)
+//    @Enumerated(EnumType.STRING)
+//    private Set<Role> role;
 
     public String getUserName() {
         return userName;
@@ -60,14 +67,6 @@ public class User {
         this.userPassword = userPassword;
     }
 
-    public Set<Role> getRole() {
-        return role;
-    }
-
-    public void setRole(Set<Role> role) {
-        this.role = role;
-    }
-
     public String getDepartmentName() {
         return departmentName;
     }
@@ -92,4 +91,27 @@ public class User {
         this.isActivated = isActivated;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public RoleType getRoleType() {
+        return roleType;
+    }
+
+    public void setRoleType(RoleType roleType) {
+        this.roleType = roleType;
+    }
+
+    public ActivationStatus getActivationStatus() {
+        return activationStatus;
+    }
+
+    public void setActivationStatus(ActivationStatus activationStatus) {
+        this.activationStatus = activationStatus;
+    }
 }

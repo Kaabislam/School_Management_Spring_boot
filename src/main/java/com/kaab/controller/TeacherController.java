@@ -4,6 +4,7 @@ import com.kaab.dao.StudentDao;
 import com.kaab.dao.TeacherDao;
 import com.kaab.dao.UserDao;
 import com.kaab.entity.Student;
+import com.kaab.entity.Teacher;
 import com.kaab.service.JwtService;
 import com.kaab.service.TeacherService;
 import com.kaab.service.UserService;
@@ -33,14 +34,26 @@ public class TeacherController {
     @Autowired
     private StudentDao studentDao;
 
+    @Transactional      // ok
+    @PutMapping("/teacher/editProfile/{id}")
+//    @PreAuthorize("hasRole('Admin')")       // preauthorize korte hobe nahole token chara edit kora hoye jacche
+    public Teacher editProfile(@PathVariable String id, @RequestBody Teacher updatedUser) {
+        Teacher existingUser = teacherDao.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+        existingUser.setUser(existingUser.getUser());
+        return teacherDao.save(updatedUser);
+    }
 
-    @GetMapping("/{teacherId}/students")
+    // find all the student whose are in the teacher advising list
+    @GetMapping("/{teacherId}/students")    // ok
     public ResponseEntity<List<String>> getStudentIdsByTeacherId(@PathVariable("teacherId") String teacherId) {
         List<String> studentIds = teacherDao.findStudentIdsByTeacherId(teacherId);
         return ResponseEntity.ok(studentIds);
     }
+
+    // remove an student from advising list
     @Transactional
-    @GetMapping("/teacher/{studentId}")
+    @PutMapping("/teacher/{studentId}")         //ok
     public Student removeFromAdvisingList(@PathVariable("studentId") String studentId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = null;
@@ -48,16 +61,15 @@ public class TeacherController {
             userId = authentication.getName();
 
         }
-        Student existingStudent = studentDao.findById(studentId)
+        Student currentStudent = studentDao.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + studentId));
-        if(!existingStudent.getAdvisorId().equals(userId)){
+        if(!currentStudent.getAdvisorId().equals(userId)){
 
-            throw new RuntimeException("this student is not in your advising list - "+ studentId + " " + userId + " " + existingStudent.getAdvisorId());
+            throw new RuntimeException("this student is not in your advising list - "+ studentId + " " + userId + " " + currentStudent.getAdvisorId());
         }
-        existingStudent.setAdvisorId(null);
 
-        return  existingStudent;
-
-
+        currentStudent.setAdvisorId(null);
+        currentStudent.getUser().setAdvisorId(currentStudent.getAdvisorId());
+        return  currentStudent;
     }
 }

@@ -1,7 +1,6 @@
 package com.kaab.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 public class Teacher {
@@ -11,6 +10,9 @@ public class Teacher {
     private String phoneNumber;
     private String departmentName;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     public String getUserName() {
         return userName;
@@ -42,5 +44,13 @@ public class Teacher {
 
     public void setDepartmentName(String departmentName) {
         this.departmentName = departmentName;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

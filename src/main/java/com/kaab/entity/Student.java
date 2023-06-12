@@ -1,8 +1,6 @@
 package com.kaab.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
 public class Student{
@@ -14,7 +12,9 @@ public class Student{
 
     private String advisorId;
 
-
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     public String getUserName() {
         return userName;
@@ -54,5 +54,13 @@ public class Student{
 
     public void setAdvisorId(String advisorId) {
         this.advisorId = advisorId;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }
