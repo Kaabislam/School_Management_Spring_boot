@@ -48,42 +48,8 @@ public class UserController {
     }
 
 
-
-    @GetMapping({"/forAdmin"})
-//    @PreAuthorize("hasRole('Admin')")
-    public String forAdmin(){
-        return "This URL is only accessible to the admin";
-    }
-
-    @GetMapping({"/forUser"})
-    @PreAuthorize("hasRole('User')")
-    public String forUser(){
-        return "This URL is only accessible to the user";
-    }
-
-
-    @GetMapping("/users")
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<User> getAllUsers() {
-        return userDao.findAll();
-    }
-
-
-
-
-    // this is for admin
-    // admin can find any user with his id
-    @GetMapping("/users/{stringId}")        // ok
-    @PreAuthorize("hasRole('ADMIN')")
-    public User getUserDataByAdmin(@PathVariable String stringId) {
-        Optional<User> userOptional = userDao.findById(stringId);
-
-        return userOptional.orElseThrow(() -> new RuntimeException("User not found with string ID: " + stringId));
-    }
-
     // common for admin,student and teacher
-
-    @PutMapping("/users/resetPassword")             // ok
+    @PutMapping("/users/resetPassword")
 //    @PreAuthorize("hasRole('Admin')")
     public User resetPassword(@RequestBody User updatedUser) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -100,7 +66,7 @@ public class UserController {
 
 
     // admin teacher and students everyone access this
-    // to view his profile information from user table
+    // to view his own profile information from user table
     @GetMapping("users/viewProfile")        //ok
 //    @PreAuthorize("hasRole('ADMIN') or hasRole('STUDENT') or hasRole('TEACHER')")       // preauthorize korte hobe nahole token chara edit kora hoye jacche
     public ResponseEntity<Optional<User>> getCurrentUser(Authentication authentication) {

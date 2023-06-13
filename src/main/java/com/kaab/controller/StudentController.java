@@ -9,6 +9,7 @@ import com.kaab.service.JwtService;
 import com.kaab.service.StudentService;
 import com.kaab.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,9 +30,10 @@ public class StudentController {
     private StudentService studentService;
     @Autowired
     private StudentDao studentDao;
-    @Transactional      // ok
+
+    @Transactional
     @PutMapping("/student/editProfile/{id}")
-//    @PreAuthorize("hasRole('Admin')")       // preauthorize korte hobe nahole token chara edit kora hoye jacche
+    @PreAuthorize("hasRole('STUDENT')")
     public Student editProfile(@PathVariable String id, @RequestBody Student updatedUser) {
         Student existingUser = studentDao.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));

@@ -7,6 +7,7 @@ import com.kaab.entity.*;
 import com.kaab.service.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,7 @@ public class RequestController {
     // student send request on teachers end
     // if sending is successful then request status will be pending initially
     @Transactional
-    @PostMapping("/request")        // OK
+    @PostMapping("/request")
     public Request createRequest(@RequestBody Request request) {
         return requestDao.save(request);
     }
@@ -42,23 +43,24 @@ public class RequestController {
     // find all the request
     // can be applicable for admin only
     @Transactional
-    @GetMapping("/request")     // ok
+    @GetMapping("/request")
     public List<Request> getAllRequest() throws Exception {
         return requestDao.findAll();
     }
 
     // find all the request for a teacher using teacher id
     // use request table
-    @GetMapping("/request/{teacherId}")         // ok
+    @GetMapping("/request/{teacherId}")
     public ResponseEntity<List<Request>> getAllRequest(@PathVariable("teacherId") String teacherId) {
         List<Request> requestList = requestDao.findAllByTeacherId(teacherId);
         return ResponseEntity.ok(requestList);
     }
 
-    // accept or reject a request
+    // accept a request
     // from teachers end
     @Transactional
-    @PutMapping("/acceptRequest/{requestId}")           // ok
+    @PutMapping("/acceptRequest/{requestId}")
+//    @PreAuthorize("hasRole(TEACHER)")
     public ResponseEntity<Request> acceptRequest(@PathVariable("requestId") Long requestId){
         Request currentRequest = requestDao.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found with ID: " + requestId));
@@ -71,8 +73,11 @@ public class RequestController {
         return ResponseEntity.ok(currentRequest);
     }
 
+
+    // REJECT A REQUEST
     @Transactional
-    @PutMapping("/rejectRequest/{requestId}")   // ok
+    @PutMapping("/rejectRequest/{requestId}")
+//    @PreAuthorize("hasRole(TEACHER)")
     public ResponseEntity<Request> rejectRequest(@PathVariable("requestId") Long requestId){
         Request currentRequest = requestDao.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found with ID: " + requestId));

@@ -35,7 +35,7 @@ public class TeacherController {
     @Autowired
     private StudentDao studentDao;
 
-    @Transactional      // ok
+    @Transactional
     @PutMapping("/teacher/editProfile/{id}")
     @PreAuthorize("hasRole('TEACHER')")       // preauthorize korte hobe nahole token chara edit kora hoye jacche
     public Teacher editProfile(@PathVariable String id, @RequestBody Teacher updatedUser) {
@@ -45,9 +45,8 @@ public class TeacherController {
         return teacherDao.save(updatedUser);
     }
 
-    // find all the student whose are in the teacher advising list
-    @GetMapping("/{teacherId}/students")    // ok
-
+    // find all the student whose are in this teacher advising list
+    @GetMapping("/{teacherId}/students")
     public ResponseEntity<List<String>> getStudentIdsByTeacherId(@PathVariable("teacherId") String teacherId) {
         List<String> studentIds = teacherDao.findStudentIdsByTeacherId(teacherId);
         return ResponseEntity.ok(studentIds);
@@ -55,7 +54,7 @@ public class TeacherController {
 
     // remove an student from advising list
     @Transactional
-    @PutMapping("/teacher/{studentId}")         //ok
+    @PutMapping("/teacher/{studentId}")
     public Student removeFromAdvisingList(@PathVariable("studentId") String studentId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = null;
@@ -67,7 +66,7 @@ public class TeacherController {
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + studentId));
         if(!currentStudent.getAdvisorId().equals(userId)){
 
-            throw new RuntimeException("this student is not in your advising list - "+ studentId + " " + userId + " " + currentStudent.getAdvisorId());
+            throw new RuntimeException("this student is not in your advising list - "+ studentId );
         }
 
         currentStudent.setAdvisorId(null);
