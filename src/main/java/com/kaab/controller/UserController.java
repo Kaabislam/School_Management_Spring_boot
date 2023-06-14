@@ -48,9 +48,8 @@ public class UserController {
     }
 
 
-    // common for admin,student and teacher
+    // COMMON FOR ADMIN,STUDENT AND TEACHER
     @PutMapping("/users/resetPassword")
-//    @PreAuthorize("hasRole('Admin')")
     public User resetPassword(@RequestBody User updatedUser) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = null;
@@ -65,10 +64,8 @@ public class UserController {
     }
 
 
-    // admin teacher and students everyone access this
-    // to view his own profile information from user table
-    @GetMapping("users/viewProfile")        //ok
-//    @PreAuthorize("hasRole('ADMIN') or hasRole('STUDENT') or hasRole('TEACHER')")       // preauthorize korte hobe nahole token chara edit kora hoye jacche
+    // EVERY ROLE CAN ACCESS THIS TO VIEW HIS OWN PROFILE
+    @GetMapping("users/viewProfile")
     public ResponseEntity<Optional<User>> getCurrentUser(Authentication authentication) {
         String currentUserId = authentication.getName();
         Optional<User> userOptional = userDao.findById(currentUserId);
@@ -79,9 +76,6 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
     }
-
-
-
 
     public String getEncodedPassword(String password) {
         return passwordEncoder.encode(password);

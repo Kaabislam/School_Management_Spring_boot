@@ -1,3 +1,5 @@
+// SENDING REQUEST , ACCEPT OR REJECT REQUEST , FIND ALL THE REQUESTS ARE HANDLED IN REQUEST CONTROLLER
+
 package com.kaab.controller;
 
 import com.kaab.dao.RequestDao;
@@ -32,44 +34,45 @@ public class RequestController {
         this.requestService = requestService;
     }
 
-    // student send request on teachers end
+    // ONLY STUDENT CAN SEND REQUEST TO TEACHERS
     // if sending is successful then request status will be pending initially
     @Transactional
     @PostMapping("/request")
+    @PreAuthorize("hasRole('STUDENT')")
     public Request createRequest(@RequestBody Request request) {
         return requestDao.save(request);
     }
 
-    // find all the request
-    // can be applicable for admin only
+    // GET ALL THE REQUEST ON DATABASE
+    // ONLY ADMIN AUTHORIZED CAN ACCESS
     @Transactional
     @GetMapping("/request")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Request> getAllRequest() throws Exception {
         return requestDao.findAll();
     }
 
-    // find all the request for a teacher using teacher id
-    // use request table
+    // A TEACHER FIND OUT ALL THE REQUEST CURRENTLY REQUESTED
+    // USE REQUEST TABLE
     @GetMapping("/request/{teacherId}")
-    public ResponseEntity<List<Request>> getAllRequest(@PathVariable("teacherId") String teacherId) {
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<List<Request>> getAllRequest(@PathVariable("teacherId") String teacherId) throws Exception{
         List<Request> requestList = requestDao.findAllByTeacherId(teacherId);
         return ResponseEntity.ok(requestList);
     }
 
-    // accept a request
-    // from teachers end
+    // ACCEPT A REQUEST FROM TEACHERS END
+    // ALSO UPDATES ON STUDENT TABLE MAKE THE TEACHER AS ADVISOR OF REQUESTED STUDENT
     @Transactional
     @PutMapping("/acceptRequest/{requestId}")
-//    @PreAuthorize("hasRole(TEACHER)")
+    @PreAuthorize("hasRole(TEACHER)")
     public ResponseEntity<Request> acceptRequest(@PathVariable("requestId") Long requestId){
         Request currentRequest = requestDao.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found with ID: " + requestId));
         // UPDATE REQUEST TABLE
         currentRequest.setStatus(RequestStatus.ACCEPTED);
-
         // ALSO MODIFIED ON STUDENT TABLE
         currentRequest.getStudent().setAdvisorId(currentRequest.getTeacher().getUserName());
-
         return ResponseEntity.ok(currentRequest);
     }
 
@@ -77,7 +80,7 @@ public class RequestController {
     // REJECT A REQUEST
     @Transactional
     @PutMapping("/rejectRequest/{requestId}")
-//    @PreAuthorize("hasRole(TEACHER)")
+    @PreAuthorize("hasRole(TEACHER)")
     public ResponseEntity<Request> rejectRequest(@PathVariable("requestId") Long requestId){
         Request currentRequest = requestDao.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found with ID: " + requestId));

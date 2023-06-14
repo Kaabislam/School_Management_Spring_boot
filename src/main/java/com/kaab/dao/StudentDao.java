@@ -9,7 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface StudentDao extends CrudRepository<Student,String> {
-
     Optional<Student> findById(String id);
 
 }

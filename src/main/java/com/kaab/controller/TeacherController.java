@@ -37,7 +37,7 @@ public class TeacherController {
 
     @Transactional
     @PutMapping("/teacher/editProfile/{id}")
-    @PreAuthorize("hasRole('TEACHER')")       // preauthorize korte hobe nahole token chara edit kora hoye jacche
+    @PreAuthorize("hasRole('TEACHER')")
     public Teacher editProfile(@PathVariable String id, @RequestBody Teacher updatedUser) {
         Teacher existingUser = teacherDao.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
@@ -47,28 +47,24 @@ public class TeacherController {
 
     // find all the student whose are in this teacher advising list
     @GetMapping("/{teacherId}/students")
+    @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<List<String>> getStudentIdsByTeacherId(@PathVariable("teacherId") String teacherId) {
         List<String> studentIds = teacherDao.findStudentIdsByTeacherId(teacherId);
         return ResponseEntity.ok(studentIds);
     }
 
-    // remove an student from advising list
+    // REMOVE A STUDENT FROM ADVISING LIST
     @Transactional
     @PutMapping("/teacher/{studentId}")
     public Student removeFromAdvisingList(@PathVariable("studentId") String studentId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = null;
-        if (authentication != null && authentication.isAuthenticated()) {
-            userId = authentication.getName();
-
-        }
+        if (authentication != null && authentication.isAuthenticated())  userId = authentication.getName();
         Student currentStudent = studentDao.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + studentId));
         if(!currentStudent.getAdvisorId().equals(userId)){
-
-            throw new RuntimeException("this student is not in your advising list - "+ studentId );
+            throw new RuntimeException("This Student is not in your Advising List - "+ studentId );
         }
-
         currentStudent.setAdvisorId(null);
         currentStudent.getUser().setAdvisorId(currentStudent.getAdvisorId());
         return  currentStudent;

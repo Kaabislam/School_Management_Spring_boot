@@ -38,45 +38,50 @@ public class AdminController {
     private PasswordEncoder passwordEncoder;
 
 
+    //  ONLY ADMIN COULD SEE ALL THE USERS
     @GetMapping("/admin/users")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<User> getAllUsers() {
         return userDao.findAll();
     }
+
     @GetMapping("/admin/teachers")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Teacher> getAllTeachers() {
         return (List<Teacher>) teacherDao.findAll();
     }
 
     @GetMapping("/admin/students")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Student> getAllStudents() {
         return (List<Student>) studentDao.findAll();
     }
 
     @PostMapping({"/admin/registerNewUser"})
-//    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public User registerNewUser(@RequestBody User user) {
         return userDao.save(user);
     }
 
     @Transactional
     @PutMapping({"/admin/registerNewStudent"})
-//    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public Student registerNewStudent(@RequestBody Student student) {
         student.getUser().setUserPassword(passwordEncoder.encode(student.getUser().getUserPassword()));
         student.getUser().setActivationStatus(ActivationStatus.ACTIVE);
         return studentDao.save(student);
     }
 
-    @Transactional          //ok
+    @Transactional
     @PostMapping({"/admin/registerNewTeacher"})
-//    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public Teacher registerTeacher(@RequestBody Teacher teacher) {
         teacher.getUser().setUserPassword(passwordEncoder.encode(teacher.getUser().getUserPassword()));
         return teacherDao.save(teacher);
     }
 
-    // this is for admin
-    // admin can find any user with his id
+    // THIS IS FOR ADMIN ONLY
+    // ADMIN CAN FIND ANY USER WITH THE USER ID
     @GetMapping("/admin/users/{stringId}")        // ok
     @PreAuthorize("hasRole('ADMIN')")
     public User getUserDataByAdmin(@PathVariable String stringId) {
@@ -86,7 +91,8 @@ public class AdminController {
     }
 
 
-    @PutMapping("/admin/activeAccount/{id}")        // ok
+    @PutMapping("/admin/activeAccount/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public User makeAccountActive(@PathVariable String id) {
         User currentUser = userDao.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
@@ -95,6 +101,7 @@ public class AdminController {
     }
 
     @PutMapping("/admin/deactiveAccount/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public User makeAccountDeactive(@PathVariable String id) {
         User currentUser = userDao.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
