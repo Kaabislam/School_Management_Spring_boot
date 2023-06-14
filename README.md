@@ -11,7 +11,7 @@ MySql is used as database for this project
 
 On the frontend i use Next js 13.4.5 and react js 18.2.0
 
-FrontEnd Projec repository : https://github.com/Kaabislam/Management_FrontEnd
+FrontEnd Project repository : https://github.com/Kaabislam/Management_FrontEnd
 
 # Output
 ## Admin Interface
